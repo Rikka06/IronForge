@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>淬火工坊（IronForge）法律合规文档</title>
+    <style>
+        /* 针对 PDF 打印和屏幕阅读器优化的全局样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            line-height: 1.6;
+            color: #333333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #ffffff;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            color: #000000;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+        }
+
+        h2 {
+            font-size: 18px;
+            color: #1a1a1a;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        ul {
+            font-size: 14px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        strong {
+            color: #000000;
+        }
+
+        /* 打印时自动在新的一页开始每个独立协议 */
+        .page-break {
+            page-break-before: always;
+            margin-top: 50px;
+        }
+
+        .document-section {
+            margin-bottom: 40px;
+        }
+
+        /* 打印样式设定 */
+        @media print {
+            body {
+                padding: 0;
+                margin: 2cm;
+            }
+            .page-break {
+                margin-top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="document-section">
+        <h1>淬火工坊（IronForge）用户协议</h1>
+        
+        <h2>1. 导言</h2>
+        <p>欢迎使用“淬火工坊（IronForge）”（以下简称“本应用”）。本应用是一款专为智能手表设计的臂部节律与运动辅助工具。在您下载、安装或使用本应用之前，请务必审慎阅读并充分理解本协议的所有条款。您的使用行为将被视为对本协议全部内容的认可与接受。</p>
+
+        <h2>2. 服务说明</h2>
+        <p>本应用通过调用智能手表的内置传感器（如加速度计），检测并记录您的手臂往复运动数据（如频率、时长等），为您提供运动复盘、评级计算及成就解锁功能。</p>
+
+        <h2>3. 用户行为规范</h2>
+        <ul>
+            <li>您同意在安全、合法、合理的环境下使用本应用。</li>
+            <li>您不得在驾驶、操作机械或任何需要高度集中注意力的危险场景下使用本应用。</li>
+            <li>您不得对本应用进行反向工程、反向编译或反汇编，不得修改本应用的程序或破坏其功能。</li>
+        </ul>
+
+        <h2>4. 知识产权</h2>
+        <p>本应用的所有权及知识产权（包括但不限于代码、UI 设计、图标、文案、评级与成就系统）均归开发者所有，受著作权法及相关法律法规保护。未经明确授权，任何人不得用于商业目的的复制、分发或改编。</p>
+
+        <h2>5. 协议修改</h2>
+        <p>开发者保留在必要时修改本协议的权利。修改后的协议将在应用更新时随之发布。如果您继续使用本应用，即视为接受修改后的条款。</p>
+    </div>
+
+    <div class="document-section page-break">
+        <h1>淬火工坊（IronForge）隐私政策</h1>
+
+        <h2>1. 信息的收集</h2>
+        <p>为了实现本应用的核心运动检测功能，我们需要收集或处理您的以下信息：</p>
+        <ul>
+            <li><strong>传感器数据</strong>：应用在处于“锻造（运动）”页面时，会实时读取手表的“三轴加速度传感器”数据，用于计算运动频率（SPM）和冲程次数。</li>
+            <li><strong>本地应用数据</strong>：包括您的历史运动记录（时长、次数、评级）、应用设置（佩戴方向、震动强度、灵敏度参数）以及成就解锁状态。</li>
+        </ul>
+
+        <h2>2. 信息的存储与安全（核心声明）</h2>
+        <p>本应用遵循“数据极简与完全本地化”原则：</p>
+        <ul>
+            <li><strong>纯本地存储</strong>：您的所有传感器实时数据、历史运动记录、设置和成就，<strong>均仅保存在您的智能手表本地存储（设备端）中</strong>。</li>
+            <li><strong>无网络传输</strong>：本应用未接入任何外部服务器，不包含任何数据上传、云端备份或后台联网代码。您的数据绝不会被发送给开发者或任何第三方。</li>
+        </ul>
+
+        <h2>3. 信息的使用</h2>
+        <p>收集的传感器数据仅用于瞬间的算法检测（均值穿越检测），不会作为持久化文件保存。保存的历史记录仅用于在应用内的“报告”、“历史”和“统计”页面向您进行可视化展示。</p>
+
+        <h2>4. 信息的控制与删除</h2>
+        <p>您拥有对自身数据的完全控制权。您可以随时在应用内的“历史记录”页面选择“单条删除”或“一键清空”所有运动记录。卸载本应用也将彻底清除与本应用相关的所有本地数据。</p>
+    </div>
+
+    <div class="document-section page-break">
+        <h1>淬火工坊（IronForge）健康与免责声明</h1>
+        
+        <p>在使用本应用进行任何运动或训练前，请务必仔细阅读以下免责声明：</p>
+
+        <h2>1. 运动健康风险</h2>
+        <p>本应用鼓励的“往复手臂运动”可能涉及高频的肌肉收缩与关节摩擦。</p>
+        <ul>
+            <li><strong>非医疗建议</strong>：本应用非医疗器械，提供的数据（如运动频率、时长）仅供参考，不能替代专业的医疗或体能训练指导。</li>
+            <li><strong>量力而行</strong>：高频、长时间的手臂挥动可能导致肌肉酸痛、韧带拉伤、关节劳损或腱鞘炎等问题。请您务必根据自身体能状况适度训练。如果在运动过程中感到疼痛、不适或头晕，请立即停止并寻求医疗帮助。</li>
+            <li><strong>免责条款</strong>：用户因过度使用本应用、未做好热身/冷身，或隐瞒自身基础疾病而导致的任何身体损伤或健康问题，开发者不承担任何法律责任。</li>
+        </ul>
+
+        <h2>2. 设备安全风险</h2>
+        <ul>
+            <li>在进行剧烈的手臂挥动时，请确保您的智能手表表带已正确且牢固地扣紧。</li>
+            <li>请在宽敞、无障碍物的环境中进行运动，避免手臂击打到硬物造成人员受伤或设备损坏。</li>
+            <li>因用户挥动过猛导致手表脱落摔坏，或碰撞导致的财产损失，由用户自行承担。</li>
+        </ul>
+
+        <h2>3. 数据准确性</h2>
+        <p>受限于智能手表硬件传感器的采样率及个体动作差异，本应用可能存在漏计、多计或数据波动的情况。开发者不对数据的绝对准确性作任何担保。</p>
+    </div>
+
+</body>
+</html>
