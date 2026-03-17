@@ -1,0 +1,289 @@
+<!-- 淬火工坊 | 作者：弦 | 抖音：LOVE54760 | B站：北极弦 -->
+<template>
+  <div class="ach-page">
+    <!-- 标题 -->
+    <div class="header">
+      <text class="header-title">成就殿堂</text>
+      <div class="header-line"></div>
+    </div>
+
+    <!-- 进度 -->
+    <div class="progress-area">
+      <text class="progress-text">已解锁 {{ unlockedCount }} / {{ totalCount }}</text>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width: {{ progressWidth }}px"></div>
+      </div>
+    </div>
+
+    <!-- 可滚动成就列表 -->
+    <list class="list-area" scrollpage="false">
+      <list-item class="ach-card" type="default" for="{{ achievementList }}">
+        <div class="card-inner">
+          <div class="ach-dot" style="background-color: {{ $item.dotColor }}"></div>
+          <div class="ach-info">
+            <text class="ach-name" style="color: {{ $item.nameColor }}">{{ $item.name }}</text>
+            <text class="ach-desc">{{ $item.displayDesc }}</text>
+          </div>
+          <text class="ach-mark" if="{{ $item.unlocked }}" style="color: {{ $item.nameColor }}">V</text>
+        </div>
+      </list-item>
+
+      <!-- 底部安全区 -->
+      <list-item class="list-footer" type="default">
+        <div class="footer-inner">
+          <div class="btn-back" onclick="goBack">
+            <text class="btn-text">返回</text>
+          </div>
+        </div>
+      </list-item>
+    </list>
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import storage from "@system.storage"
+
+var ACH_PREFIX = 'ach_'
+
+var DEFS = [
+  { id: 'apprentice', name: '初入铁匠铺', desc: '点燃炉火，完成人生第一次锻造', hint: '完成首次锻造', rare: 1 },
+  { id: 'steam', name: '炉火升温', desc: '锻造节奏加快，铁炉温度攀升', hint: '提升锻造速度', rare: 2 },
+  { id: 'lightspeed', name: '雷霆万钧', desc: '锤击速度突破极限，铁砧上火花四溅', hint: '极致爆发力', rare: 4 },
+  { id: 'premature', name: '极速爆破', desc: '高强度短时爆发式锻造，瞬间释放全部力量', hint: '短时高强度', rare: 3 },
+  { id: 'quickdraw', name: '闪电出击', desc: '高效率完成一次快速锻造', hint: '速战速决', rare: 2 },
+  { id: 'edging', name: '精准控制', desc: '张弛有度，精确掌控锻造节奏的起停', hint: '多次暂停与恢复', rare: 4 },
+  { id: 'sleepyhead', name: '晨练先锋', desc: '在周末清晨开始一天的锻造', hint: '特定时间段', rare: 3 },
+  { id: 'midnight', name: '夜间淬炼', desc: '万籁俱寂，唯有锤声回荡在深夜铁匠铺', hint: '深夜锻造', rare: 3 },
+  { id: 'singles', name: '铁匠节庆典', desc: '在这个特别的日子里，以锤代笔书写传奇', hint: '特别的日子', rare: 5 },
+  { id: 'valentine', name: '以铁为伴', desc: '浪漫佳节依然坚守铁匠铺，与铁砧为伴', hint: '浪漫节日锻造', rare: 5 },
+  { id: 'machine', name: '精密锻压', desc: '锤击节奏如同精密机械般稳定而持久', hint: '极致稳定性', rare: 4 },
+  { id: 'ambidex', name: '双臂均衡', desc: '切换至非惯用手锻造，追求全面发展', hint: '切换佩戴手', rare: 3 },
+  { id: 'sage', name: '静心冥想', desc: '锻造后静坐沉思，领悟工匠之道的真谛', hint: '锻后深度沉思', rare: 4 },
+  { id: 'clean', name: '工位整理', desc: '锻造完毕后认真审视成果，整理工位', hint: '锻后短暂停留', rare: 2 },
+  { id: 'kirin', name: '千锤百炼', desc: '累计锻造达到惊人数量，真正的钢铁之臂', hint: '量变引起质变', rare: 5 }
+]
+
+function getRareColor(rare) {
+  if (rare >= 5) return '#FF4500'
+  if (rare >= 4) return '#E040FB'
+  if (rare >= 3) return '#FFD700'
+  if (rare >= 2) return '#4ECDC4'
+  return '#A8A8A8'
+}
+
+export default {
+  private: {
+    achievementList: [],
+    unlockedCount: 0,
+    totalCount: 15,
+    progressWidth: 0
+  },
+
+  onShow() {
+    this._load()
+  },
+
+  _load() {
+    var self = this
+    var ids = []
+    for (var i = 0; i < DEFS.length; i++) {
+      ids.push(DEFS[i].id)
+    }
+    var achievements = {}
+    var remaining = ids.length
+    if (remaining === 0) { self._build({}); return }
+
+    for (var k = 0; k < ids.length; k++) {
+      (function(id) {
+        storage.get({
+          key: ACH_PREFIX + id,
+          success: function (data) {
+            if (data === '1') {
+              achievements[id] = true
+            }
+            remaining--
+            if (remaining === 0) self._build(achievements)
+          },
+          fail: function () {
+            remaining--
+            if (remaining === 0) self._build(achievements)
+          }
+        })
+      })(ids[k])
+    }
+  },
+
+  _build(achievements) {
+    var list = []
+    var count = 0
+    for (var i = 0; i < DEFS.length; i++) {
+      var d = DEFS[i]
+      var ok = !!(achievements[d.id])
+      if (ok) count++
+      var c = getRareColor(d.rare)
+      list.push({
+        name: ok ? d.name : '???',
+        displayDesc: ok ? d.desc : d.hint,
+        unlocked: ok,
+        dotColor: ok ? c : '#333333',
+        nameColor: ok ? c : '#555555'
+      })
+    }
+    this.achievementList = list
+    this.unlockedCount = count
+    this.totalCount = DEFS.length
+    this.progressWidth = DEFS.length > 0
+      ? Math.round((count / DEFS.length) * 160) : 0
+  },
+
+  goBack() {
+    router.back()
+  }
+}
+</script>
+
+<style>
+.ach-page {
+  flex-direction: column;
+  align-items: center;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+  padding-top: 12px;
+}
+
+.header {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.header-title {
+  font-size: 22px;
+  color: #FFD700;
+  font-weight: bold;
+  letter-spacing: 3px;
+}
+
+.header-line {
+  width: 36px;
+  height: 2px;
+  background-color: #FFD700;
+  margin-top: 4px;
+}
+
+/* 进度 */
+.progress-area {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.progress-text {
+  font-size: 14px;
+  color: #666666;
+  margin-bottom: 6px;
+}
+
+.progress-bar-bg {
+  width: 160px;
+  height: 6px;
+  background-color: #1A1A1A;
+  border-radius: 3px;
+}
+
+.progress-bar-fill {
+  height: 6px;
+  background-color: #FFD700;
+  border-radius: 3px;
+}
+
+/* list 组件 */
+.list-area {
+  flex: 1;
+  width: 100%;
+}
+
+/* 每个成就 list-item */
+.ach-card {
+  width: 100%;
+  height: 72px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.card-inner {
+  flex-direction: row;
+  align-items: center;
+  background-color: #0D0D0D;
+  border-radius: 12px;
+  padding: 12px;
+  width: 100%;
+  height: 64px;
+  border-width: 1px;
+  border-color: #1A1A1A;
+}
+
+.ach-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.ach-info {
+  flex: 1;
+  flex-direction: column;
+}
+
+.ach-name {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.ach-desc {
+  font-size: 13px;
+  color: #555555;
+  margin-top: 4px;
+}
+
+.ach-mark {
+  font-size: 18px;
+  font-weight: bold;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+/* 底部返回按钮 list-item */
+.list-footer {
+  width: 100%;
+  height: 80px;
+}
+
+.footer-inner {
+  width: 100%;
+  height: 80px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-back {
+  width: 120px;
+  height: 42px;
+  border-radius: 21px;
+  border-width: 1px;
+  border-color: #333333;
+  justify-content: center;
+  align-items: center;
+  background-color: #111111;
+}
+
+.btn-text {
+  font-size: 16px;
+  color: #AAAAAA;
+}
+</style>

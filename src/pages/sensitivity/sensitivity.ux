@@ -1,0 +1,416 @@
+<!-- 淬火工坊 | 作者：弦 | 抖音：LOVE54760 | B站：北极弦 -->
+<template>
+  <div class="sens-page">
+    <!-- 警告蒙层 -->
+    <div class="warning-overlay" if="{{ showWarning }}">
+      <div class="warning-box">
+        <div class="warning-icon-area">
+          <text class="warning-icon">!</text>
+        </div>
+        <text class="warning-title">高级设置</text>
+        <text class="warning-desc">如果使用上没有问题</text>
+        <text class="warning-desc">请不要修改以下设置</text>
+        <text class="warning-desc2">请确保你知道自己在做什么</text>
+        <div class="warning-actions">
+          <div class="btn-cancel" onclick="goBack">
+            <text class="btn-cancel-text">返回</text>
+          </div>
+          <div class="btn-confirm" onclick="dismissWarning">
+            <text class="btn-confirm-text">我了解</text>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 设置内容 -->
+    <div class="content-area" if="{{ !showWarning }}">
+      <div class="header">
+        <text class="header-title">灵敏度</text>
+        <div class="header-line"></div>
+      </div>
+
+      <div class="scroll-area">
+        <!-- 检测门槛 -->
+        <div class="param-card">
+          <div class="param-header">
+            <text class="param-name">检测裕量</text>
+            <text class="param-value">{{ thresholdDisplay }}g</text>
+          </div>
+          <text class="param-desc">超过均值多少才计数 越低越灵敏</text>
+          <div class="slider-row">
+            <div class="slider-btn" onclick="thresholdDown">
+              <text class="slider-btn-text">-</text>
+            </div>
+            <div class="slider-bar">
+              <div class="slider-fill" style="width: {{ thresholdPercent }}px"></div>
+            </div>
+            <div class="slider-btn" onclick="thresholdUp">
+              <text class="slider-btn-text">+</text>
+            </div>
+          </div>
+        </div>
+
+        <!-- 防抖时间 -->
+        <div class="param-card">
+          <div class="param-header">
+            <text class="param-name">防抖时间</text>
+            <text class="param-value">{{ debounceDisplay }}ms</text>
+          </div>
+          <text class="param-desc">两次计数最小间隔 140ms支持最快速度</text>
+          <div class="slider-row">
+            <div class="slider-btn" onclick="debounceDown">
+              <text class="slider-btn-text">-</text>
+            </div>
+            <div class="slider-bar">
+              <div class="slider-fill" style="width: {{ debouncePercent }}px"></div>
+            </div>
+            <div class="slider-btn" onclick="debounceUp">
+              <text class="slider-btn-text">+</text>
+            </div>
+          </div>
+        </div>
+
+        <!-- 恢复默认 -->
+        <div class="reset-area">
+          <div class="btn-reset" onclick="resetDefaults">
+            <text class="btn-reset-text">恢复默认值</text>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="btn-back" onclick="goBack">
+          <text class="btn-text">返回</text>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import storage from "@system.storage"
+import { loadSettings, saveSettings, getDefaultSettings } from "../../common/utils.js"
+
+export default {
+  private: {
+    showWarning: true,
+    _settings: null,
+    thresholdDisplay: '0.20',
+    debounceDisplay: '140',
+    thresholdPercent: 50,
+    debouncePercent: 50
+  },
+
+  onInit() {
+    var self = this
+    loadSettings(storage, function (settings) {
+      self._settings = settings
+      self._updateDisplays()
+    })
+  },
+
+  _updateDisplays() {
+    var s = this._settings.sensitivity
+    this.thresholdDisplay = (Math.round(s.minThreshold * 100) / 100).toFixed(2)
+    this.debounceDisplay = Math.round(s.debounceMs) + ''
+
+    // 进度条（映射到0-100px）
+    this.thresholdPercent = Math.round(((s.minThreshold - 0.05) / 0.45) * 100)
+    this.debouncePercent = Math.round(((s.debounceMs - 60) / 240) * 100)
+  },
+
+  dismissWarning() {
+    this.showWarning = false
+  },
+
+  _adjustAndSave(param, delta) {
+    var s = this._settings.sensitivity
+    if (param === 'minThreshold') {
+      s.minThreshold = Math.max(0.05, Math.min(0.50, s.minThreshold + delta))
+    } else if (param === 'debounceMs') {
+      s.debounceMs = Math.max(60, Math.min(300, s.debounceMs + delta))
+    } else if (param === 'dropRatio') {
+      s.dropRatio = Math.max(0.10, Math.min(0.80, s.dropRatio + delta))
+    } else if (param === 'adaptRatio') {
+      s.adaptRatio = Math.max(0.20, Math.min(1.00, s.adaptRatio + delta))
+    }
+    this._updateDisplays()
+    saveSettings(storage, this._settings, function () {})
+  },
+
+  thresholdDown() { this._adjustAndSave('minThreshold', -0.05) },
+  thresholdUp() { this._adjustAndSave('minThreshold', 0.05) },
+  debounceDown() { this._adjustAndSave('debounceMs', -20) },
+  debounceUp() { this._adjustAndSave('debounceMs', 20) },
+
+  resetDefaults() {
+    var defaults = getDefaultSettings()
+    this._settings.sensitivity = defaults.sensitivity
+    this._updateDisplays()
+    saveSettings(storage, this._settings, function () {})
+  },
+
+  goBack() {
+    router.back()
+  }
+}
+</script>
+
+<style>
+.sens-page {
+  flex-direction: column;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+}
+
+/* 警告蒙层 */
+.warning-overlay {
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  justify-content: center;
+  align-items: center;
+}
+
+.warning-box {
+  width: 190px;
+  flex-direction: column;
+  align-items: center;
+  background-color: #0A0A0A;
+  border-width: 1px;
+  border-color: #FF4500;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.warning-icon-area {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  border-width: 2px;
+  border-color: #FF4500;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.warning-icon {
+  font-size: 28px;
+  color: #FF4500;
+  font-weight: bold;
+}
+
+.warning-title {
+  font-size: 20px;
+  color: #FFFFFF;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.warning-desc {
+  font-size: 14px;
+  color: #AAAAAA;
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.warning-desc2 {
+  font-size: 14px;
+  color: #FF4500;
+  text-align: center;
+  margin-bottom: 16px;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+.warning-actions {
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.btn-cancel {
+  flex: 1;
+  height: 38px;
+  border-radius: 19px;
+  border-width: 1px;
+  border-color: #333333;
+  justify-content: center;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.btn-cancel-text {
+  font-size: 15px;
+  color: #888888;
+}
+
+.btn-confirm {
+  flex: 1;
+  height: 38px;
+  background-color: #FF4500;
+  border-radius: 19px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-confirm-text {
+  font-size: 15px;
+  color: #000000;
+  font-weight: bold;
+}
+
+/* 内容区 */
+.content-area {
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding-top: 12px;
+}
+
+.header {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.header-title {
+  font-size: 22px;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.header-line {
+  width: 36px;
+  height: 2px;
+  background-color: #FF4500;
+  margin-top: 4px;
+}
+
+.scroll-area {
+  flex-direction: column;
+  width: 92%;
+  flex: 1;
+  overflow: scroll;
+}
+
+.param-card {
+  flex-direction: column;
+  background-color: #111111;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-width: 1px;
+  border-color: #1A1A1A;
+}
+
+.param-header {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.param-name {
+  font-size: 15px;
+  color: #CCCCCC;
+  font-weight: bold;
+}
+
+.param-value {
+  font-size: 16px;
+  color: #00E5FF;
+  font-weight: bold;
+}
+
+.param-desc {
+  font-size: 12px;
+  color: #555555;
+  margin-top: 4px;
+  margin-bottom: 10px;
+}
+
+.slider-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.slider-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: #222222;
+  justify-content: center;
+  align-items: center;
+  border-width: 1px;
+  border-color: #333333;
+}
+
+.slider-btn-text {
+  font-size: 20px;
+  color: #AAAAAA;
+  font-weight: bold;
+}
+
+.slider-bar {
+  flex: 1;
+  height: 6px;
+  background-color: #1A1A1A;
+  border-radius: 3px;
+  margin-left: 10px;
+  margin-right: 10px;
+  overflow: hidden;
+}
+
+.slider-fill {
+  height: 6px;
+  background-color: #00E5FF;
+  border-radius: 3px;
+}
+
+.reset-area {
+  align-items: center;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+.btn-reset {
+  width: 130px;
+  height: 36px;
+  border-radius: 18px;
+  border-width: 1px;
+  border-color: #FF4500;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-reset-text {
+  font-size: 14px;
+  color: #FF4500;
+}
+
+.footer {
+  height: 54px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-back {
+  width: 110px;
+  height: 40px;
+  border-radius: 20px;
+  border-width: 1px;
+  border-color: #333333;
+  justify-content: center;
+  align-items: center;
+  background-color: #111111;
+}
+
+.btn-text {
+  font-size: 16px;
+  color: #AAAAAA;
+}
+</style>

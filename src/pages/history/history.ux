@@ -1,0 +1,454 @@
+<!-- 淬火工坊 | 作者：弦 | 抖音：LOVE54760 | B站：北极弦 -->
+<template>
+  <div class="history-page">
+    <!-- 标题 -->
+    <div class="header">
+      <text class="header-title">锻造记录</text>
+      <div class="header-line"></div>
+    </div>
+
+    <!-- 可滚动记录列表 -->
+    <div class="list-area" if="{{ hasRecords }}">
+      <!-- 统计入口卡片 -->
+      <div class="stats-entry" onclick="viewStats">
+        <text class="stats-icon">[+]</text>
+        <text class="stats-text">查看周报/月报统计</text>
+        <text class="stats-arrow">></text>
+      </div>
+
+      <div class="record-card" for="{{ records }}">
+        <div class="card-main" onclick="viewDetail($idx)">
+          <div class="card-left">
+            <text class="record-badge" style="color: {{ $item.badgeColor }}">{{ $item.badgeTier }}</text>
+          </div>
+          <div class="card-right">
+            <text class="record-date">{{ $item.dateShort }}</text>
+            <div class="card-row-bottom">
+              <text class="record-stat">{{ $item.strokes }} 次</text>
+              <text class="record-stat-sub">{{ $item.durationText }}</text>
+            </div>
+          </div>
+        </div>
+        <div class="btn-del" onclick="deleteItem($idx)">
+          <text class="btn-del-icon">×</text>
+        </div>
+      </div>
+    </div>
+
+    <!-- 空状态 -->
+    <div class="empty-area" if="{{ !hasRecords }}">
+      <!-- 统计入口卡片（空状态也显示） -->
+      <div class="stats-entry" onclick="viewStats">
+        <text class="stats-icon">[+]</text>
+        <text class="stats-text">查看周报/月报统计</text>
+        <text class="stats-arrow">></text>
+      </div>
+      <text class="empty-text">暂无记录</text>
+    </div>
+
+    <!-- 底部操作 -->
+    <div class="bottom-area">
+      <div class="btn-back" onclick="goBack">
+        <text class="btn-text">返回</text>
+      </div>
+      <div class="btn-clear" onclick="showClearConfirm" if="{{ hasRecords }}">
+        <text class="btn-text-danger">清空全部</text>
+      </div>
+    </div>
+    <div class="safe-bottom"></div>
+
+    <!-- 清空确认弹窗 -->
+    <div class="modal-overlay" if="{{ showConfirm }}">
+      <div class="modal-box">
+        <text class="modal-title">警告</text>
+        <text class="modal-desc">确认删除所有记录？</text>
+        <div class="modal-actions">
+          <div class="modal-btn-cancel" onclick="cancelClear">
+            <text class="modal-btn-text">取消</text>
+          </div>
+          <div class="modal-btn-confirm" onclick="confirmClear">
+            <text class="modal-btn-confirm-text">删除</text>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import storage from "@system.storage"
+import { loadHistory, deleteRecord, clearHistory, formatDuration } from "../../common/utils.js"
+
+export default {
+  private: {
+    records: [],
+    hasRecords: false,
+    showConfirm: false
+  },
+
+  onShow() {
+    this._loadRecords()
+  },
+
+  _loadRecords() {
+    var self = this
+    loadHistory(storage, function (history) {
+      for (var i = 0; i < history.length; i++) {
+        history[i].durationText = formatDuration(history[i].duration || 0)
+        var d = history[i].date || ''
+        history[i].dateShort = d.length > 10 ? d.substring(5) : d
+        if (history[i].ratings && history[i].ratings.overall) {
+          history[i].badgeTier = history[i].ratings.overall.tier
+          history[i].badgeColor = history[i].ratings.overall.color
+        } else if (history[i].rating) {
+          history[i].badgeTier = history[i].rating.tier
+          history[i].badgeColor = history[i].rating.color
+        } else {
+          history[i].badgeTier = '-'
+          history[i].badgeColor = '#666666'
+        }
+      }
+      self.records = history
+      self.hasRecords = history.length > 0
+    })
+  },
+
+  viewDetail(index) {
+    if (this.records[index]) {
+      router.push({
+        uri: "/pages/report",
+        params: {
+          sessionData: JSON.stringify(this.records[index])
+        }
+      })
+    }
+  },
+
+  deleteItem(index) {
+    var self = this
+    deleteRecord(storage, index, function (success) {
+      if (success) {
+        self._loadRecords()
+      }
+    })
+  },
+
+  goBack() {
+    router.back()
+  },
+
+  showClearConfirm() {
+    this.showConfirm = true
+  },
+
+  cancelClear() {
+    this.showConfirm = false
+  },
+
+  confirmClear() {
+    var self = this
+    clearHistory(storage, function (success) {
+      if (success) {
+        self.showConfirm = false
+        self._loadRecords()
+      }
+    })
+  },
+
+  viewStats() {
+    router.push({
+      uri: "/pages/stats"
+    })
+  }
+}
+</script>
+
+<style>
+.history-page {
+  flex-direction: column;
+  align-items: center;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+  padding-top: 10px;
+  padding-bottom: 8px;
+}
+
+.header {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.header-row {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+.header-title {
+  font-size: 20px;
+  color: #FFFFFF;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+/* 统计入口卡片样式 */
+.stats-entry {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 44px;
+  background-color: #1A1A1A;
+  border-radius: 22px;
+  margin-bottom: 10px;
+  border-width: 1px;
+  border-color: #333333;
+}
+
+.stats-icon {
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.stats-text {
+  font-size: 14px;
+  color: #FFD700;
+  font-weight: bold;
+}
+
+.stats-arrow {
+  font-size: 14px;
+  color: #666666;
+  margin-left: 8px;
+}
+
+.header-line {
+  width: 40px;
+  height: 2px;
+  background-color: #FF4500;
+  margin-top: 4px;
+}
+
+/* 列表区域：flex:1 占满剩余空间，overflow:scroll 可滚动 */
+.list-area {
+  flex-direction: column;
+  width: 92%;
+  flex: 1;
+  overflow: scroll;
+}
+
+/* 每条记录：card-main（可点击跳转）+ btn-del（独立删除） */
+.record-card {
+  flex-direction: row;
+  align-items: center;
+  background-color: #111111;
+  border-radius: 8px;
+  margin-bottom: 7px;
+  border-width: 1px;
+  border-color: #222222;
+}
+
+/* 可点击区域（跳转详情） */
+.card-main {
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 10px;
+}
+
+.card-left {
+  width: 40px;
+  justify-content: center;
+  align-items: center;
+  border-right-width: 1px;
+  border-right-color: #333333;
+  margin-right: 10px;
+}
+
+.record-badge {
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.card-right {
+  flex: 1;
+  flex-direction: column;
+}
+
+.record-date {
+  font-size: 12px;
+  color: #666666;
+  margin-bottom: 3px;
+}
+
+.card-row-bottom {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.record-stat {
+  font-size: 15px;
+  color: #E0E0E0;
+  font-weight: bold;
+}
+
+.record-stat-sub {
+  font-size: 12px;
+  color: #888888;
+}
+
+/* 删除按钮：独立在卡片右侧，不在 card-main 内 */
+.btn-del {
+  width: 36px;
+  height: 100%;
+  min-height: 48px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-del-icon {
+  font-size: 22px;
+  color: #555555;
+}
+
+.empty-area {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.empty-text {
+  font-size: 16px;
+  color: #444444;
+}
+
+/* 底部按钮：固定高度 50px，不会被挤出屏幕 */
+.bottom-area {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+
+.safe-bottom {
+  width: 100%;
+  height: 0;
+}
+
+.btn-back {
+  width: 88px;
+  height: 36px;
+  border-radius: 18px;
+  border-width: 1px;
+  border-color: #333333;
+  justify-content: center;
+  align-items: center;
+  margin-right: 14px;
+  background-color: #111111;
+}
+
+.btn-text {
+  font-size: 14px;
+  color: #AAAAAA;
+}
+
+.btn-clear {
+  width: 100px;
+  height: 36px;
+  border-radius: 18px;
+  border-width: 1px;
+  border-color: #FF3333;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-text-danger {
+  font-size: 14px;
+  color: #FF3333;
+  font-weight: bold;
+}
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.92);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  width: 185px;
+  flex-direction: column;
+  align-items: center;
+  background-color: #111111;
+  border-width: 1px;
+  border-color: #FF3333;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.modal-title {
+  font-size: 18px;
+  color: #FF3333;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.modal-desc {
+  font-size: 13px;
+  color: #AAAAAA;
+  margin-bottom: 14px;
+}
+
+.modal-actions {
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.modal-btn-cancel {
+  flex: 1;
+  height: 32px;
+  border-radius: 16px;
+  border-width: 1px;
+  border-color: #444444;
+  justify-content: center;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.modal-btn-text {
+  font-size: 13px;
+  color: #888888;
+}
+
+.modal-btn-confirm {
+  flex: 1;
+  height: 32px;
+  background-color: #FF3333;
+  border-radius: 16px;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-btn-confirm-text {
+  font-size: 13px;
+  color: #000000;
+  font-weight: bold;
+}
+</style>

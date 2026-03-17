@@ -1,0 +1,61 @@
+{
+  "package": "top.beijixian.watch.jerkforge",
+  "name": "淬火工坊",
+  "versionName": "1.0.0",
+  "versionCode": 1,
+  "minPlatformVersion": 1000,
+  "icon": "/common/logo.png",
+  "deviceTypeList": [
+    "watch"
+  ],
+  "features": [
+    {
+      "name": "system.router"
+    },
+    {
+      "name": "system.sensor"
+    },
+    {
+      "name": "system.vibrator"
+    },
+    {
+      "name": "system.audio"
+    },
+    {
+      "name": "system.storage"
+    }
+  ],
+  "config": {
+    "logLevel": "log",
+    "designWidth": "device-width"
+  },
+  "router": {
+    "entry": "pages/index",
+    "pages": {
+      "pages/index": {
+        "component": "index"
+      },
+      "pages/forge": {
+        "component": "forge"
+      },
+      "pages/report": {
+        "component": "report"
+      },
+      "pages/history": {
+        "component": "history"
+      },
+      "pages/stats": {
+        "component": "stats"
+      },
+      "pages/settings": {
+        "component": "settings"
+      },
+      "pages/sensitivity": {
+        "component": "sensitivity"
+      },
+      "pages/achievements": {
+        "component": "achievements"
+      }
+    }
+  }
+}

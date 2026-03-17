@@ -1,0 +1,348 @@
+<!-- 淬火工坊 | 作者：弦 | 抖音：LOVE54760 | B站：北极弦 -->
+<template>
+  <div class="home-page">
+    <!-- 协议弹窗（首次进入） -->
+    <div class="agreement-overlay" if="{{showAgreement}}">
+      <div class="agreement-content">
+        <text class="agreement-title">用户协议</text>
+        <text class="agreement-hint">请扫描下方二维码</text>
+        <text class="agreement-hint">阅读用户协议、隐私政策</text>
+        <text class="agreement-hint">及免责声明</text>
+        <image class="qr-image" src="/common/agreement_qr.png"></image>
+        <div class="agreement-btn-area">
+          <div class="btn-agree" onclick="onAgree">
+            <text class="btn-agree-text">我同意</text>
+          </div>
+          <div class="btn-refuse">
+            <text class="btn-refuse-text">我拒绝</text>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主页内容（同意后显示） -->
+    <div class="main-content" if="{{!showAgreement}}">
+      <!-- 标题区域 -->
+      <div class="title-area">
+        <div class="title-row">
+          <text class="app-title-white">铁</text>
+          <text class="app-title-orange">锻</text>
+        </div>
+        <div class="title-underline"></div>
+        <text class="app-desc">数字锻造模拟器</text>
+      </div>
+
+      <!-- 中间铁砧图标 -->
+      <div class="icon-area">
+        <div class="anvil-top"></div>
+        <div class="anvil-body"></div>
+        <div class="anvil-base"></div>
+      </div>
+
+      <!-- 按钮区域 -->
+      <div class="btn-area">
+        <div class="btn-forge" onclick="startForge">
+          <text class="btn-text-main">开始锻造</text>
+        </div>
+        <div class="btn-row">
+          <div class="btn-sub" onclick="viewHistory">
+            <text class="btn-text-sub">记录</text>
+          </div>
+          <div class="btn-sub" onclick="viewAchievements">
+            <text class="btn-text-sub">成就</text>
+          </div>
+          <div class="btn-sub" onclick="viewSettings">
+            <text class="btn-text-sub">设置</text>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import storage from "@system.storage"
+
+var AGREEMENT_KEY = 'ironforge_agreement_accepted'
+
+export default {
+  data: {
+    showAgreement: false
+  },
+
+  onInit() {
+    var self = this
+    storage.get({
+      key: AGREEMENT_KEY,
+      success: function (data) {
+        if (data === '1') {
+          self.showAgreement = false
+        } else {
+          self.showAgreement = true
+        }
+      },
+      fail: function () {
+        // 首次进入，没有存储记录
+        self.showAgreement = true
+      }
+    })
+  },
+
+  onAgree() {
+    var self = this
+    storage.set({
+      key: AGREEMENT_KEY,
+      value: '1',
+      success: function () {
+        self.showAgreement = false
+      },
+      fail: function () {
+        // 即使存储失败也让用户进入
+        self.showAgreement = false
+      }
+    })
+  },
+
+  startForge() {
+    router.push({
+      uri: "/pages/forge"
+    })
+  },
+
+  viewHistory() {
+    router.push({
+      uri: "/pages/history"
+    })
+  },
+
+  viewAchievements() {
+    router.push({
+      uri: "/pages/achievements"
+    })
+  },
+
+  viewSettings() {
+    router.push({
+      uri: "/pages/settings"
+    })
+  }
+}
+</script>
+
+<style>
+.home-page {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== 协议弹窗样式 ===== */
+.agreement-overlay {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+}
+
+.agreement-content {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.agreement-title {
+  font-size: 24px;
+  color: #FFFFFF;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.agreement-hint {
+  font-size: 13px;
+  color: #AAAAAA;
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.qr-image {
+  width: 180px;
+  height: 180px;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.agreement-btn-area {
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.btn-agree {
+  width: 160px;
+  height: 50px;
+  background-color: #2ECC40;
+  border-radius: 25px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.btn-agree-text {
+  font-size: 20px;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.btn-refuse {
+  width: 160px;
+  height: 50px;
+  background-color: #444444;
+  border-radius: 25px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-refuse-text {
+  font-size: 20px;
+  color: #888888;
+  font-weight: bold;
+}
+
+/* ===== 主页内容样式 ===== */
+.main-content {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.title-area {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.title-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-title-white {
+  font-size: 64px;
+  color: #FFFFFF;
+  font-weight: bold;
+  line-height: 68px;
+}
+
+.app-title-orange {
+  font-size: 64px;
+  color: #FF4500;
+  font-weight: bold;
+  line-height: 68px;
+}
+
+.title-underline {
+  width: 50px;
+  height: 3px;
+  background-color: #00E5FF;
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+
+.app-desc {
+  font-size: 16px;
+  color: #666666;
+  letter-spacing: 3px;
+}
+
+/* 铁砧图标 - 放大 */
+.icon-area {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  margin-top: 4px;
+}
+
+.anvil-top {
+  width: 100px;
+  height: 20px;
+  background-color: #333333;
+  border-radius: 6px;
+  margin-bottom: 3px;
+}
+
+.anvil-body {
+  width: 60px;
+  height: 44px;
+  background-color: #222222;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.anvil-base {
+  width: 110px;
+  height: 14px;
+  background-color: #333333;
+  border-radius: 6px;
+  margin-top: 3px;
+}
+
+.btn-area {
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.btn-forge {
+  width: 180px;
+  height: 56px;
+  background-color: #FF4500;
+  border-radius: 28px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.btn-text-main {
+  font-size: 22px;
+  color: #000000;
+  font-weight: bold;
+}
+
+.btn-row {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-sub {
+  width: 60px;
+  height: 36px;
+  justify-content: center;
+  align-items: center;
+  border-width: 1px;
+  border-color: #333333;
+  border-radius: 18px;
+  background-color: #111111;
+  margin-left: 6px;
+  margin-right: 6px;
+}
+
+.btn-text-sub {
+  font-size: 14px;
+  color: #888888;
+}
+</style>

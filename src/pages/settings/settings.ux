@@ -1,0 +1,367 @@
+<!-- 淬火工坊 | 作者：弦 | 抖音：LOVE54760 | B站：北极弦 -->
+<template>
+  <div class="settings-page">
+    <!-- 标题 -->
+    <div class="header">
+      <text class="header-title">设 置</text>
+      <div class="header-line"></div>
+    </div>
+
+    <!-- 内容区 -->
+    <div class="scroll-area">
+
+      <!-- 佩戴方向 -->
+      <div class="section-card">
+        <text class="section-label">佩戴方向</text>
+        <div class="toggle-row">
+          <div class="toggle-btn" if="{{ hand === 'left' }}" onclick="setHandRight">
+            <text class="toggle-text-on">左手</text>
+          </div>
+          <div class="toggle-btn-off" if="{{ hand !== 'left' }}" onclick="setHandLeft">
+            <text class="toggle-text-off">左手</text>
+          </div>
+          <div class="toggle-btn" if="{{ hand === 'right' }}" onclick="setHandLeft">
+            <text class="toggle-text-on">右手</text>
+          </div>
+          <div class="toggle-btn-off" if="{{ hand !== 'right' }}" onclick="setHandRight">
+            <text class="toggle-text-off">右手</text>
+          </div>
+        </div>
+      </div>
+
+      <!-- 震动力度 -->
+      <div class="section-card">
+        <text class="section-label">震动力度</text>
+        <div class="toggle-row">
+          <div class="{{ vibration === 'off' ? 'seg-active' : 'seg-btn' }}" onclick="setVibOff">
+            <text class="{{ vibration === 'off' ? 'seg-text-on' : 'seg-text' }}">关</text>
+          </div>
+          <div class="{{ vibration === 'weak' ? 'seg-active' : 'seg-btn' }}" onclick="setVibWeak">
+            <text class="{{ vibration === 'weak' ? 'seg-text-on' : 'seg-text' }}">弱</text>
+          </div>
+          <div class="{{ vibration === 'normal' ? 'seg-active' : 'seg-btn' }}" onclick="setVibNormal">
+            <text class="{{ vibration === 'normal' ? 'seg-text-on' : 'seg-text' }}">中</text>
+          </div>
+          <div class="{{ vibration === 'strong' ? 'seg-active' : 'seg-btn' }}" onclick="setVibStrong">
+            <text class="{{ vibration === 'strong' ? 'seg-text-on' : 'seg-text' }}">强</text>
+          </div>
+        </div>
+      </div>
+
+      <!-- 灵敏度入口 -->
+      <div class="nav-card" onclick="openSensitivity">
+        <text class="nav-label">灵敏度设置</text>
+        <text class="nav-sub">仅限高级用户</text>
+        <text class="nav-arrow">></text>
+      </div>
+
+      <!-- 署名 -->
+      <div class="credit-card">
+        <text class="credit-title">淬火工坊</text>
+        <text class="credit-author">作者：弦</text>
+        <text class="credit-line">抖音  LOVE54760</text>
+        <text class="credit-line">B站  北极弦</text>
+      </div>
+
+    </div>
+
+    <!-- 底部 -->
+    <div class="footer">
+      <div class="btn-back" onclick="goBack">
+        <text class="btn-text">返回</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import storage from "@system.storage"
+import { loadSettings, saveSettings } from "../../common/utils.js"
+
+export default {
+  private: {
+    hand: 'right',
+    vibration: 'normal',
+    _settings: null
+  },
+
+  onShow() {
+    var self = this
+    loadSettings(storage, function (settings) {
+      self._settings = settings
+      self.hand = settings.hand
+      self.vibration = settings.vibration
+    })
+  },
+
+  setHandLeft() {
+    this.hand = 'left'
+    this._settings.hand = 'left'
+    this._settings.handChanged = true
+    saveSettings(storage, this._settings, function () {})
+  },
+
+  setHandRight() {
+    this.hand = 'right'
+    this._settings.hand = 'right'
+    this._settings.handChanged = true
+    saveSettings(storage, this._settings, function () {})
+  },
+
+  setVibOff() {
+    this.vibration = 'off'
+    this._settings.vibration = 'off'
+    saveSettings(storage, this._settings, function () {})
+  },
+
+  setVibWeak() {
+    this.vibration = 'weak'
+    this._settings.vibration = 'weak'
+    saveSettings(storage, this._settings, function () {})
+  },
+
+  setVibNormal() {
+    this.vibration = 'normal'
+    this._settings.vibration = 'normal'
+    saveSettings(storage, this._settings, function () {})
+  },
+
+  setVibStrong() {
+    this.vibration = 'strong'
+    this._settings.vibration = 'strong'
+    saveSettings(storage, this._settings, function () {})
+  },
+
+  openSensitivity() {
+    router.push({
+      uri: "/pages/sensitivity"
+    })
+  },
+
+  goBack() {
+    router.back()
+  }
+}
+</script>
+
+<style>
+.settings-page {
+  flex-direction: column;
+  align-items: center;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+  padding-top: 12px;
+}
+
+.header {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.header-title {
+  font-size: 22px;
+  color: #FFFFFF;
+  font-weight: bold;
+  letter-spacing: 4px;
+}
+
+.header-line {
+  width: 36px;
+  height: 2px;
+  background-color: #FF4500;
+  margin-top: 4px;
+}
+
+.scroll-area {
+  flex-direction: column;
+  width: 92%;
+  flex: 1;
+  overflow: scroll;
+  padding-bottom: 8px;
+}
+
+/* 设置卡片 */
+.section-card {
+  flex-direction: column;
+  background-color: #111111;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border-width: 1px;
+  border-color: #1A1A1A;
+}
+
+.section-label {
+  font-size: 16px;
+  color: #888888;
+  margin-bottom: 12px;
+}
+
+.toggle-row {
+  flex-direction: row;
+  justify-content: center;
+}
+
+/* 选中 */
+.toggle-btn {
+  width: 80px;
+  height: 40px;
+  border-radius: 20px;
+  justify-content: center;
+  align-items: center;
+  background-color: #FF4500;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+.toggle-text-on {
+  font-size: 16px;
+  color: #000000;
+  font-weight: bold;
+}
+
+/* 未选中 */
+.toggle-btn-off {
+  width: 80px;
+  height: 40px;
+  border-radius: 20px;
+  justify-content: center;
+  align-items: center;
+  background-color: #1A1A1A;
+  margin-left: 8px;
+  margin-right: 8px;
+  border-width: 1px;
+  border-color: #333333;
+}
+
+.toggle-text-off {
+  font-size: 16px;
+  color: #888888;
+}
+
+/* 震动分段 */
+.seg-btn {
+  width: 46px;
+  height: 38px;
+  border-radius: 19px;
+  justify-content: center;
+  align-items: center;
+  background-color: #1A1A1A;
+  margin-left: 4px;
+  margin-right: 4px;
+  border-width: 1px;
+  border-color: #333333;
+}
+
+.seg-active {
+  width: 46px;
+  height: 38px;
+  border-radius: 19px;
+  justify-content: center;
+  align-items: center;
+  background-color: #FF4500;
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.seg-text {
+  font-size: 15px;
+  color: #888888;
+}
+
+.seg-text-on {
+  font-size: 15px;
+  color: #000000;
+  font-weight: bold;
+}
+
+/* 导航卡片 */
+.nav-card {
+  flex-direction: column;
+  background-color: #111111;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border-width: 1px;
+  border-color: #333333;
+  position: relative;
+}
+
+.nav-label {
+  font-size: 18px;
+  color: #CCCCCC;
+  font-weight: bold;
+}
+
+.nav-sub {
+  font-size: 13px;
+  color: #555555;
+  margin-top: 4px;
+}
+
+.nav-arrow {
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  font-size: 20px;
+  color: #555555;
+}
+
+.footer {
+  height: 54px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-back {
+  width: 110px;
+  height: 40px;
+  border-radius: 20px;
+  border-width: 1px;
+  border-color: #333333;
+  justify-content: center;
+  align-items: center;
+  background-color: #111111;
+}
+
+.btn-text {
+  font-size: 16px;
+  color: #AAAAAA;
+}
+
+/* 署名卡片 */
+.credit-card {
+  flex-direction: column;
+  align-items: center;
+  background-color: #0A0A0A;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border-width: 1px;
+  border-color: #1A1A1A;
+}
+
+.credit-title {
+  font-size: 16px;
+  color: #FF4500;
+  font-weight: bold;
+  margin-bottom: 6px;
+  letter-spacing: 3px;
+}
+
+.credit-author {
+  font-size: 15px;
+  color: #CCCCCC;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.credit-line {
+  font-size: 13px;
+  color: #555555;
+  margin-top: 3px;
+}
+</style>

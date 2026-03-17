@@ -1,0 +1,21 @@
+<script>
+export default {
+  onCreate() {
+    console.log("IronForge app created")
+  },
+  onDestroy() {
+    console.log("IronForge app destroyed")
+  }
+}
+</script>
+
+<style>
+/* ═══ IronForge 全局样式 ═══ */
+/* 复古工业风配色方案 */
+/* 主背景: #0A0A0A (深黑) */
+/* 主色调: #FF6B35 (熔铁橙) */
+/* 强调色: #FFD700 (金色) */
+/* 辅助色: #4ECDC4 (冷翠) */
+/* 文字色: #E0E0E0 (浅灰) */
+/* 暗调色: #1A1A2E (深蓝黑) */
+</style>

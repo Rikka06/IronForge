@@ -1,0 +1,379 @@
+<template>
+  <div class="stats-page">
+    <!-- 标题栏 -->
+    <div class="header">
+      <text class="header-title">锻造统计</text>
+      <div class="header-line"></div>
+    </div>
+
+    <!-- 切换标签 -->
+    <div class="tab-bar">
+      <div class="tab-item {{ currentTab === 0 ? 'tab-active' : '' }}" onclick="switchTab(0)">
+        <text class="tab-text {{ currentTab === 0 ? 'text-active' : '' }}">周报</text>
+      </div>
+      <div class="tab-item {{ currentTab === 1 ? 'tab-active' : '' }}" onclick="switchTab(1)">
+        <text class="tab-text {{ currentTab === 1 ? 'text-active' : '' }}">月报</text>
+      </div>
+    </div>
+
+    <!-- 内容区域 -->
+    <div class="content-area">
+      <swiper class="swiper" index="{{ currentTab }}" onchange="onTabChange">
+        
+        <!-- 周报视角 -->
+        <div class="report-view">
+          <div class="stat-card-lg">
+            <text class="stat-value-lg" style="color: #FFD700">{{ weekly.totalStrokes }}</text>
+            <text class="stat-label">本周总次数</text>
+          </div>
+          
+          <div class="stat-row">
+            <div class="stat-card-sm">
+              <text class="stat-value-sm">{{ weekly.count }}</text>
+              <text class="stat-label-sm">训练频次</text>
+            </div>
+            <div class="stat-card-sm">
+              <text class="stat-value-sm">{{ weekly.avgSPM }}</text>
+              <text class="stat-label-sm">平均速度</text>
+            </div>
+          </div>
+
+          <div class="stat-card-wide">
+            <text class="stat-value-md">{{ weekly.durationText }}</text>
+            <text class="stat-label">总时长</text>
+          </div>
+          
+          <!-- 简易柱状图 (Week Activity) -->
+          <div class="chart-area">
+            <div class="bar-group" for="{{ weekly.days }}">
+              <div class="bar-fill" style="height: {{ $item > 0 ? ($item * 50 / weekly.maxDay) : 2 }}px; background-color: {{ $item > 0 ? '#FF4500' : '#333333' }}"></div>
+              <text class="bar-label">{{ ['一','二','三','四','五','六','日'][$idx] }}</text>
+            </div>
+          </div>
+        </div>
+
+        <!-- 月报视角 -->
+        <div class="report-view">
+          <div class="stat-card-lg">
+            <text class="stat-value-lg" style="color: #FF4500">{{ monthly.totalStrokes }}</text>
+            <text class="stat-label">本月总次数</text>
+          </div>
+          
+          <div class="stat-row">
+            <div class="stat-card-sm">
+              <text class="stat-value-sm">{{ monthly.count }}</text>
+              <text class="stat-label-sm">训练频次</text>
+            </div>
+            <div class="stat-card-sm">
+              <text class="stat-value-sm">{{ monthly.avgSPM }}</text>
+              <text class="stat-label-sm">平均速度</text>
+            </div>
+          </div>
+
+          <div class="stat-card-wide">
+            <text class="stat-value-md">{{ monthly.durationText }}</text>
+            <text class="stat-label">总时长</text>
+          </div>
+
+          <div class="motivation-area">
+            <text class="motivation-text">{{ monthly.comment }}</text>
+          </div>
+        </div>
+
+      </swiper>
+    </div>
+
+    <!-- 底部返回 -->
+    <div class="footer">
+      <div class="btn-back" onclick="goBack">
+        <text class="btn-text">返回</text>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import storage from "@system.storage"
+import { loadHistory, getWeeklyStats, getMonthlyStats, formatDuration } from "../../common/utils.js"
+
+export default {
+  private: {
+    currentTab: 0,
+    weekly: {
+      totalStrokes: 0,
+      totalDuration: 0,
+      durationText: '00:00',
+      count: 0,
+      avgSPM: 0,
+      days: [0,0,0,0,0,0,0],
+      maxDay: 1
+    },
+    monthly: {
+      totalStrokes: 0,
+      totalDuration: 0,
+      durationText: '00:00',
+      count: 0,
+      avgSPM: 0,
+      comment: '继续加油！'
+    }
+  },
+
+  onShow() {
+    this._loadData()
+  },
+
+  _loadData() {
+    var self = this
+    loadHistory(storage, function (history) {
+      // 计算周报
+      var wStats = getWeeklyStats(history)
+      wStats.durationText = formatDuration(wStats.totalDuration)
+      // 计算最大日数据用于图表缩放
+      var max = 1
+      for (var i = 0; i < wStats.days.length; i++) {
+        if (wStats.days[i] > max) max = wStats.days[i]
+      }
+      wStats.maxDay = max
+      self.weekly = wStats
+
+      // 计算月报
+      var mStats = getMonthlyStats(history)
+      mStats.durationText = formatDuration(mStats.totalDuration)
+      
+      // 鼓励语
+      if (mStats.totalStrokes > 10000) mStats.comment = '神匠级成就！'
+      else if (mStats.totalStrokes > 5000) mStats.comment = '宗师级工匠！'
+      else if (mStats.totalStrokes > 1000) mStats.comment = '熟练工匠！'
+      else mStats.comment = '学徒，继续努力！'
+      
+      self.monthly = mStats
+    })
+  },
+
+  switchTab(index) {
+    this.currentTab = index
+  },
+
+  onTabChange(e) {
+    this.currentTab = e.index
+  },
+
+  goBack() {
+    router.back()
+  }
+}
+</script>
+
+<style>
+.stats-page {
+  flex-direction: column;
+  align-items: center;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+  padding-top: 10px;
+}
+
+.header {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.header-title {
+  font-size: 18px;
+  color: #FFFFFF;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.header-line {
+  width: 30px;
+  height: 2px;
+  background-color: #FF4500;
+  margin-top: 4px;
+}
+
+.tab-bar {
+  flex-direction: row;
+  width: 80%;
+  height: 36px;
+  background-color: #111111;
+  border-radius: 18px;
+  margin-bottom: 10px;
+  border-width: 1px;
+  border-color: #333333;
+}
+
+.tab-item {
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  border-radius: 18px;
+}
+
+.tab-active {
+  background-color: #333333;
+}
+
+.tab-text {
+  font-size: 14px;
+  color: #888888;
+}
+
+.text-active {
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.content-area {
+  flex: 1;
+  width: 100%;
+}
+
+.swiper {
+  width: 100%;
+  height: 100%;
+}
+
+.report-view {
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.stat-card-lg {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.stat-value-lg {
+  font-size: 40px;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666666;
+  margin-top: -2px;
+}
+
+.stat-row {
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.stat-card-sm {
+  flex-direction: column;
+  align-items: center;
+  background-color: #111111;
+  width: 48%;
+  padding: 8px;
+  border-radius: 8px;
+  border-width: 1px;
+  border-color: #222222;
+}
+
+.stat-value-sm {
+  font-size: 20px;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.stat-label-sm {
+  font-size: 11px;
+  color: #888888;
+}
+
+.stat-card-wide {
+  flex-direction: column;
+  align-items: center;
+  background-color: #111111;
+  width: 90%;
+  padding: 8px;
+  border-radius: 8px;
+  border-width: 1px;
+  border-color: #222222;
+  margin-bottom: 10px;
+}
+
+.stat-value-md {
+  font-size: 24px;
+  color: #00E5FF;
+  font-weight: bold;
+  font-family: monospace;
+}
+
+.chart-area {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 90%;
+  height: 70px;
+  background-color: #080808;
+  border-radius: 8px;
+  padding: 5px;
+  padding-bottom: 2px;
+}
+
+.bar-group {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  width: 12%;
+}
+
+.bar-fill {
+  width: 6px;
+  border-radius: 3px;
+  margin-bottom: 2px;
+}
+
+.bar-label {
+  font-size: 9px;
+  color: #444444;
+}
+
+.motivation-area {
+  margin-top: 10px;
+  align-items: center;
+}
+
+.motivation-text {
+  font-size: 14px;
+  color: #FFD700;
+  font-style: italic;
+}
+
+.footer {
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-back {
+  width: 100px;
+  height: 36px;
+  border-radius: 18px;
+  border-width: 1px;
+  border-color: #333333;
+  justify-content: center;
+  align-items: center;
+  background-color: #111111;
+}
+
+.btn-text {
+  font-size: 14px;
+  color: #AAAAAA;
+}
+</style>

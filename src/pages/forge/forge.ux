@@ -1,0 +1,413 @@
+<!-- 淬火工坊 | 作者：弦 | 抖音：LOVE54760 | B站：北极弦 -->
+<template>
+  <div class="forge-page">
+
+    <!-- 标题 -->
+    <div class="header">
+      <text class="header-title">锻 造</text>
+    </div>
+
+    <!-- 主计数 -->
+    <div class="count-area">
+      <text class="count-num">{{ strokes }}</text>
+      <text class="count-label">次</text>
+    </div>
+
+    <!-- 速度 + 时长 竖排卡片 -->
+    <div class="stats-card">
+      <div class="stat-row">
+        <text class="stat-val">{{ spmDisplay }}</text>
+        <text class="stat-key">速度</text>
+      </div>
+      <div class="card-divider"></div>
+      <div class="stat-row">
+        <text class="stat-val-time">{{ timeDisplay }}</text>
+        <text class="stat-key">时长</text>
+      </div>
+    </div>
+
+    <!-- 结束按钮 -->
+    <div class="btn-end" onclick="stopForge">
+      <text class="btn-end-text">结束</text>
+    </div>
+
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import sensor from "@system.sensor"
+import vibrator from "@system.vibrator"
+import storage from "@system.storage"
+import {
+  HammerDetector,
+  SPMCalculator,
+  getDurationRating,
+  getPeakSPMRating,
+  getStabilityRating,
+  getTotalCountRating,
+  getOverallRating,
+  computeSPMStdDevPercent,
+  saveSession,
+  loadSettings,
+  loadHistory,
+  checkSessionAchievements,
+  saveAchievements,
+  loadAchievements,
+  formatDuration
+} from "../../common/utils.js"
+
+export default {
+  private: {
+    // 状态
+    isRunning: false,
+    isPaused: false,
+
+    // 计数
+    strokes: 0,
+    spmDisplay: '0',
+    timeDisplay: '00:00',
+
+    // 内部
+    _startTime: 0,
+    _elapsed: 0,       // 累计已运行秒数（暂停时保存）
+    _pauseStart: 0,
+    _pauseCount: 0,
+    _maxSPM: 0,
+    _earlySPM: 0,
+    _earlyChecked: false,
+    _spmHistory: [],   // [{time, spm}]
+    _timer: null,
+    _detector: null,
+    _spmCalc: null,
+    _settings: null,
+    _sessionStart: 0
+  },
+
+  onShow() {
+    var self = this
+    // 首次进入：加载设置后自动开始
+    if (!this.isRunning) {
+      loadSettings(storage, function (s) {
+        self._settings = s
+        self.startForge()
+      })
+    }
+    // 息屏后点亮：传感器和计时器一直在跑，无需重启
+  },
+
+  onHide() {
+    // 息屏：不停传感器和计时器，让计数在后台继续
+  },
+
+  onDestroy() {
+    this._cleanup()
+  },
+
+  startForge() {
+    var self = this
+    this.strokes = 0
+    this._maxSPM = 0
+    this._earlySPM = 0
+    this._earlyChecked = false
+    this._pauseCount = 0
+    this._spmHistory = []
+    this._elapsed = 0
+    this._sessionStart = Date.now()
+
+    var sens = (this._settings && this._settings.sensitivity) || {}
+    this._detector = new HammerDetector({
+      minThreshold: sens.minThreshold !== undefined ? sens.minThreshold : 0.20,
+      debounceMs: sens.debounceMs !== undefined ? sens.debounceMs : 140
+    })
+    this._spmCalc = new SPMCalculator(60000)
+
+    this.isRunning = true
+    this.isPaused = false
+    this._startTime = Date.now()
+
+    this._startSensor()
+    this._startTimer()
+
+    // 开始震动反馈
+    this._vibrate('weak')
+  },
+
+  pauseForge() {
+    if (!this.isRunning || this.isPaused) return
+    this.isPaused = true
+    this._pauseStart = Date.now()
+    this._pauseCount++
+    this._elapsed += Math.floor((Date.now() - this._startTime) / 1000)
+    this._stopSensor()
+    this._stopTimer()
+    this._vibrate('weak')
+  },
+
+  resumeForge() {
+    if (!this.isPaused) return
+    this.isPaused = false
+    this._startTime = Date.now()
+    this._startSensor()
+    this._startTimer()
+    this._vibrate('weak')
+  },
+
+  stopForge() {
+    var self = this
+    var totalElapsed = this._elapsed
+    if (this.isRunning && !this.isPaused) {
+      totalElapsed += Math.floor((Date.now() - this._startTime) / 1000)
+    }
+
+    this.isRunning = false
+    this.isPaused = false
+    this._cleanup()
+    this._vibrate('normal')
+
+    // 构建会话数据
+    var sdPercent = computeSPMStdDevPercent(this._spmHistory)
+    var session = {
+      timestamp: this._sessionStart,
+      date: new Date(this._sessionStart).toLocaleString(),
+      strokes: this.strokes,
+      duration: totalElapsed,
+      maxSPM: this._maxSPM,
+      earlySPM: this._earlySPM,
+      pauseCount: this._pauseCount,
+      sdPercent: sdPercent,
+      spmHistory: this._spmHistory,
+      ratings: {
+        duration: getDurationRating(totalElapsed),
+        count: getTotalCountRating(this.strokes),
+        peak: getPeakSPMRating(this._maxSPM),
+        stability: getStabilityRating(sdPercent),
+        overall: getOverallRating(
+          getDurationRating(totalElapsed),
+          getTotalCountRating(this.strokes),
+          getPeakSPMRating(this._maxSPM),
+          getStabilityRating(sdPercent)
+        )
+      }
+    }
+
+    // 保存 + 检查成就 + 跳转报告
+    saveSession(storage, session, function () {
+      loadHistory(storage, function (history) {
+        loadAchievements(storage, function (achievements) {
+          var newAch = checkSessionAchievements(session, self._settings, achievements, history)
+          if (newAch.length > 0) {
+            saveAchievements(storage, achievements, function () {})
+          }
+          router.replace({
+            uri: '/pages/report',
+            params: {
+              sessionData: JSON.stringify(session)
+            }
+          })
+        })
+      })
+    })
+  },
+
+  goBack() {
+    router.back()
+  },
+
+  _startSensor() {
+    var self = this
+    sensor.subscribeAccelerometer({
+      interval: 'game',
+      callback: function (data) {
+        if (!self.isRunning || self.isPaused) return
+        var now = Date.now()
+        var hit = self._detector.detect(data.x, data.y, data.z, now)
+        if (hit) {
+          self.strokes++
+          self._spmCalc.record(now)
+          self._vibrate('tick')
+
+          // 早期SPM记录（前30秒）
+          if (!self._earlyChecked) {
+            var elapsed = (now - self._sessionStart) / 1000
+            if (elapsed <= 30) {
+              self._earlySPM = self._spmCalc.getSPM(now)
+            } else {
+              self._earlyChecked = true
+            }
+          }
+        }
+      },
+      fail: function (msg, code) {
+        console.log('sensor fail:', msg, code)
+      }
+    })
+  },
+
+  _stopSensor() {
+    try { sensor.unsubscribeAccelerometer() } catch (e) {}
+  },
+
+  _startTimer() {
+    var self = this
+    this._timer = setInterval(function () {
+      if (!self.isRunning || self.isPaused) return
+      var now = Date.now()
+      var totalSec = self._elapsed + Math.floor((now - self._startTime) / 1000)
+      self.timeDisplay = formatDuration(totalSec)
+
+      var spm = self._spmCalc.getSPM(now)
+      self.spmDisplay = spm > 0 ? '' + spm : '0'
+      if (spm > self._maxSPM) self._maxSPM = spm
+
+      // 每5秒记录一次SPM历史
+      if (totalSec > 0 && totalSec % 5 === 0) {
+        self._spmHistory.push({ time: totalSec, spm: spm })
+      }
+    }, 500)
+  },
+
+  _stopTimer() {
+    if (this._timer) {
+      clearInterval(this._timer)
+      this._timer = null
+    }
+  },
+
+  _cleanup() {
+    this._stopSensor()
+    this._stopTimer()
+  },
+
+  _vibrate(level) {
+    if (!this._settings) return
+    var vib = this._settings.vibration
+    if (vib === 'off') return
+    var duration = 30
+    if (level === 'tick') {
+      if (vib === 'weak') duration = 15
+      else if (vib === 'normal') duration = 25
+      else if (vib === 'strong') duration = 40
+    } else if (level === 'weak') {
+      duration = vib === 'strong' ? 60 : 40
+    } else if (level === 'normal') {
+      duration = vib === 'strong' ? 100 : 60
+    }
+    try {
+      vibrator.vibrate({ duration: duration })
+    } catch (e) {}
+  }
+}
+</script>
+
+<style>
+.forge-page {
+  flex-direction: column;
+  align-items: center;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+  padding-top: 20px;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+.header {
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.header-title {
+  font-size: 20px;
+  color: #FFFFFF;
+  font-weight: bold;
+  letter-spacing: 4px;
+}
+
+/* 主计数 */
+.count-area {
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.count-num {
+  font-size: 90px;
+  color: #FF4500;
+  font-weight: bold;
+  line-height: 94px;
+}
+
+.count-label {
+  font-size: 24px;
+  color: #FF4500;
+  margin-left: 6px;
+  margin-bottom: 12px;
+}
+
+/* 竖排信息卡片 */
+.stats-card {
+  flex-direction: column;
+  align-items: center;
+  background-color: #111111;
+  border-radius: 16px;
+  width: 100%;
+  margin-bottom: 16px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.stat-row {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  width: 100%;
+}
+
+.stat-val {
+  font-size: 26px;
+  color: #FFFFFF;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.stat-val-time {
+  font-size: 30px;
+  color: #FFFFFF;
+  font-weight: bold;
+  margin-bottom: 4px;
+  letter-spacing: 2px;
+}
+
+.stat-key {
+  font-size: 13px;
+  color: #555555;
+}
+
+.card-divider {
+  width: 90%;
+  height: 1px;
+  background-color: #222222;
+}
+
+/* 结束按钮 */
+.btn-end {
+  width: 100%;
+  height: 52px;
+  background-color: #FF4500;
+  border-radius: 26px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-end-text {
+  font-size: 22px;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+</style>
+

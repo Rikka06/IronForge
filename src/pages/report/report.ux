@@ -1,0 +1,526 @@
+<!-- 淬火工坊 | 作者：弦 | 抖音：LOVE54760 | B站：北极弦 -->
+<template>
+  <div class="report-page">
+    <!-- 成就解锁通知 -->
+    <div class="unlock-overlay" if="{{ showUnlock }}">
+      <div class="unlock-box">
+        <div class="unlock-star"></div>
+        <text class="unlock-label">成就解锁</text>
+        <text class="unlock-name" style="color: {{ unlockColor }}">{{ unlockName }}</text>
+        <text class="unlock-desc">{{ unlockDesc }}</text>
+        <div class="btn-dismiss" onclick="dismissUnlock">
+          <text class="btn-dismiss-text">确认</text>
+        </div>
+      </div>
+    </div>
+
+    <!-- 内容区 -->
+    <div class="scroll-area">
+      <!-- 标题 -->
+      <div class="header">
+        <text class="header-title">锻造报告</text>
+        <div class="header-line"></div>
+      </div>
+
+      <!-- 综合评级 -->
+      <div class="overall-card">
+        <text class="overall-tier" style="color: {{ overallColor }}">{{ overallTier }}</text>
+        <text class="overall-desc" style="color: {{ overallColor }}">{{ overallDesc }}</text>
+      </div>
+
+      <!-- 核心数据 -->
+      <div class="stat-row">
+        <div class="stat-item">
+          <text class="stat-value">{{ strokes }}</text>
+          <text class="stat-label">总次数</text>
+        </div>
+        <div class="stat-item">
+          <text class="stat-value">{{ durationText }}</text>
+          <text class="stat-label">时长</text>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-item">
+          <text class="stat-value">{{ avgSPM }}</text>
+          <text class="stat-label">平均速度</text>
+        </div>
+        <div class="stat-item">
+          <text class="stat-value">{{ maxSPM }}</text>
+          <text class="stat-label">最高速度</text>
+        </div>
+      </div>
+
+      <!-- 各维度评级 -->
+      <div class="divider-area">
+        <div class="divider-line"></div>
+        <text class="divider-text">详细评级</text>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="rating-card" for="{{ ratingList }}">
+        <div class="rating-left">
+          <text class="rating-name">{{ $item.name }}</text>
+          <text class="rating-desc-text">{{ $item.desc }}</text>
+        </div>
+        <div class="rating-right">
+          <text class="rating-tier" style="color: {{ $item.color }}">{{ $item.tier }}</text>
+        </div>
+      </div>
+
+      <!-- 底部按钮 -->
+      <div class="footer">
+        <div class="btn-again" onclick="goForge">
+          <text class="btn-again-text">再来一次</text>
+        </div>
+        <div class="btn-home" onclick="goHome">
+          <text class="btn-home-text">首页</text>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import router from "@system.router"
+import storage from "@system.storage"
+import {
+  formatDuration, loadHistory, loadSettings, loadAchievements,
+  saveAchievements, saveSettings, checkSessionAchievements,
+  ACHIEVEMENT_DEFS, getAchievementColor
+} from "../../common/utils.js"
+
+export default {
+  public: {
+    sessionData: '',
+    fromForge: ''
+  },
+  private: {
+    strokes: 0,
+    durationText: '00:00',
+    avgSPM: 0,
+    maxSPM: 0,
+    overallTier: '-',
+    overallColor: '#FFFFFF',
+    overallDesc: '',
+    ratingList: [],
+    showUnlock: false,
+    unlockName: '',
+    unlockDesc: '',
+    unlockColor: '#FFD700',
+    _unlockQueue: [],
+    _pageEnterTime: 0,
+    _sageTimer: null,
+    _cleanTimer: null
+  },
+
+  onInit() {
+    this._pageEnterTime = Date.now()
+    if (this.sessionData) {
+      try {
+        var session = JSON.parse(this.sessionData)
+        this._displaySession(session)
+        // 只有从锻造页过来的新会话才检查成就
+        if (this.fromForge === 'true') {
+          this._checkAchievements(session)
+        }
+      } catch (e) {
+        console.log('report parse error:', e)
+      }
+    }
+  },
+
+  onReady() {
+    // 只有从锻造页过来才启动成就计时器
+    if (this.fromForge !== 'true') return
+    var self = this
+    // 洁癖：停生1分钟
+    this._cleanTimer = setTimeout(function () {
+      self._tryTimedAchievement('clean')
+    }, 60000)
+
+    // 圣人模式：停生5分钟
+    this._sageTimer = setTimeout(function () {
+      self._tryTimedAchievement('sage')
+    }, 300000)
+  },
+
+  onDestroy() {
+    if (this._cleanTimer) clearTimeout(this._cleanTimer)
+    if (this._sageTimer) clearTimeout(this._sageTimer)
+  },
+
+  _displaySession(session) {
+    this.strokes = session.strokes || 0
+    this.durationText = formatDuration(session.duration || 0)
+    this.avgSPM = session.avgSPM || 0
+    this.maxSPM = session.maxSPM || 0
+
+    if (session.ratings) {
+      var r = session.ratings
+      if (r.overall) {
+        this.overallTier = r.overall.tier || '-'
+        this.overallColor = r.overall.color || '#FFFFFF'
+        this.overallDesc = r.overall.desc || ''
+      }
+      var list = []
+      if (r.duration) list.push({ name: r.duration.name, desc: r.duration.desc, tier: r.duration.tier, color: r.duration.color })
+      if (r.peak) list.push({ name: r.peak.name, desc: r.peak.desc, tier: r.peak.tier, color: r.peak.color })
+      if (r.stability) list.push({ name: r.stability.name, desc: r.stability.desc, tier: r.stability.tier, color: r.stability.color })
+      if (r.count) list.push({ name: r.count.name, desc: r.count.desc, tier: r.count.tier, color: r.count.color })
+      this.ratingList = list
+    }
+  },
+
+  _checkAchievements(session) {
+    var self = this
+    loadSettings(storage, function (settings) {
+      loadAchievements(storage, function (achievements) {
+        loadHistory(storage, function (history) {
+          console.log('[ACH] loaded achievements:', JSON.stringify(achievements))
+          var newIds = checkSessionAchievements(session, settings, achievements, history)
+          console.log('[ACH] newly unlocked:', JSON.stringify(newIds))
+
+          if (newIds.length > 0) {
+            // 保存解锁状态
+            saveAchievements(storage, achievements, function (ok) {
+              console.log('[ACH] save result:', ok)
+            })
+
+            // 重置 handChanged 标记
+            if (settings.handChanged) {
+              settings.handChanged = false
+              saveSettings(storage, settings, function () {})
+            }
+
+            // 入队显示
+            self._unlockQueue = []
+            for (var i = 0; i < newIds.length; i++) {
+              for (var j = 0; j < ACHIEVEMENT_DEFS.length; j++) {
+                if (ACHIEVEMENT_DEFS[j].id === newIds[i]) {
+                  self._unlockQueue.push(ACHIEVEMENT_DEFS[j])
+                  break
+                }
+              }
+            }
+            self._showNextUnlock()
+          }
+        })
+      })
+    })
+  },
+
+  _showNextUnlock() {
+    if (this._unlockQueue.length === 0) {
+      this.showUnlock = false
+      return
+    }
+    var ach = this._unlockQueue.shift()
+    this.unlockName = ach.name
+    this.unlockDesc = ach.desc
+    this.unlockColor = getAchievementColor(ach.rare)
+    this.showUnlock = true
+  },
+
+  dismissUnlock() {
+    this._showNextUnlock()
+  },
+
+  _tryTimedAchievement(id) {
+    var self = this
+    loadAchievements(storage, function (achievements) {
+      if (!achievements[id]) {
+        achievements[id] = { unlocked: true, date: new Date().toLocaleString() }
+        saveAchievements(storage, achievements, function () {
+          // 找到定义并显示
+          for (var i = 0; i < ACHIEVEMENT_DEFS.length; i++) {
+            if (ACHIEVEMENT_DEFS[i].id === id) {
+              self._unlockQueue.push(ACHIEVEMENT_DEFS[i])
+              if (!self.showUnlock) self._showNextUnlock()
+              break
+            }
+          }
+        })
+      }
+    })
+  },
+
+  goForge() {
+    router.replace({
+      uri: "/pages/forge"
+    })
+  },
+
+  goHome() {
+    router.replace({
+      uri: "/pages/index"
+    })
+  }
+}
+</script>
+
+<style>
+.report-page {
+  flex-direction: column;
+  align-items: center;
+  background-color: #000000;
+  width: 100%;
+  height: 100%;
+  padding-top: 0;
+}
+
+/* 成就解锁弹窗 */
+.unlock-overlay {
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  justify-content: center;
+  align-items: center;
+}
+
+.unlock-box {
+  width: 190px;
+  flex-direction: column;
+  align-items: center;
+  background-color: #0A0A0A;
+  border-width: 2px;
+  border-color: #FFD700;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.unlock-star {
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  background-color: #FFD700;
+  margin-bottom: 10px;
+}
+
+.unlock-label {
+  font-size: 14px;
+  color: #888888;
+  margin-bottom: 6px;
+  letter-spacing: 2px;
+}
+
+.unlock-name {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.unlock-desc {
+  font-size: 14px;
+  color: #AAAAAA;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.btn-dismiss {
+  width: 100px;
+  height: 34px;
+  background-color: #FFD700;
+  border-radius: 17px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-dismiss-text {
+  font-size: 15px;
+  color: #000000;
+  font-weight: bold;
+}
+
+.header {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-top: 28px;
+}
+
+.header-title {
+  font-size: 22px;
+  color: #FFFFFF;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.header-line {
+  width: 30px;
+  height: 2px;
+  background-color: #FF4500;
+  margin-top: 4px;
+}
+
+.scroll-area {
+  flex-direction: column;
+  align-items: center;
+  width: 92%;
+  flex: 1;
+  overflow: scroll;
+  padding-bottom: 30px;
+}
+
+/* 综合评级 */
+.overall-card {
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.overall-tier {
+  font-size: 64px;
+  font-weight: bold;
+}
+
+.overall-desc {
+  font-size: 15px;
+  margin-top: -4px;
+}
+
+/* 核心数据 */
+.stat-row {
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.stat-item {
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  background-color: #111111;
+  border-radius: 8px;
+  padding: 8px;
+  margin-left: 3px;
+  margin-right: 3px;
+  border-width: 1px;
+  border-color: #1A1A1A;
+}
+
+.stat-value {
+  font-size: 22px;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #666666;
+  margin-top: 2px;
+}
+
+/* 分割 */
+.divider-area {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.divider-line {
+  width: 30px;
+  height: 1px;
+  background-color: #333333;
+}
+
+.divider-text {
+  font-size: 14px;
+  color: #666666;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+
+/* 各维度评级卡片 */
+.rating-card {
+  flex-direction: row;
+  align-items: center;
+  background-color: #0A0A0A;
+  border-radius: 8px;
+  padding: 8px;
+  padding-left: 12px;
+  padding-right: 12px;
+  margin-bottom: 5px;
+  width: 100%;
+  border-width: 1px;
+  border-color: #151515;
+}
+
+.rating-left {
+  flex: 1;
+  flex-direction: column;
+}
+
+.rating-name {
+  font-size: 15px;
+  color: #CCCCCC;
+  font-weight: bold;
+}
+
+.rating-desc-text {
+  font-size: 12px;
+  color: #555555;
+  margin-top: 2px;
+}
+
+.rating-right {
+  width: 70px;
+  align-items: center;
+  justify-content: center;
+}
+
+.rating-tier {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* 底部 */
+.footer {
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.safe-bottom {
+  width: 100%;
+  height: 20px;
+}
+
+.btn-again {
+  width: 100px;
+  height: 40px;
+  background-color: #FF4500;
+  border-radius: 18px;
+  justify-content: center;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.btn-again-text {
+  font-size: 15px;
+  color: #000000;
+  font-weight: bold;
+}
+
+.btn-home {
+  width: 80px;
+  height: 40px;
+  border-radius: 20px;
+  border-width: 1px;
+  border-color: #333333;
+  justify-content: center;
+  align-items: center;
+  background-color: #111111;
+}
+
+.btn-home-text {
+  font-size: 15px;
+  color: #AAAAAA;
+}
+</style>
