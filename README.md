@@ -17,7 +17,7 @@
     <img src="https://img.shields.io/badge/Runtime-Node.js%2018%2B-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">
     <img src="https://img.shields.io/badge/Sensor-3--Axis%20Accel-green?style=for-the-badge&logo=generic-electric&logoColor=white" alt="Accelerometer">
     <br>
-    <a href="https://github.com/Rikka06/IronForge/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Rikka06/IronForge?style=flat-square" alt="License"></a>
+    <a href="https://github.com/Rikka06/IronForge/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Strict%20NC--SA-red?style=flat-square" alt="License"></a>
     <img src="https://img.shields.io/github/languages/top/Rikka06/IronForge?style=flat-square" alt="Top Language">
     <img src="https://img.shields.io/badge/Dev-弦%20(Xian)-orange?style=flat-square" alt="Author">
   </p>
@@ -141,7 +141,10 @@ IronForge/
 
 ## 📜 协议 (License)
 
-本项目基于 **MIT** 协议开源 - 详情请参阅 [LICENSE](LICENSE) 文件。
+本项目基于自定义的 **IronForge Open License** 开源：
+- 🚫 **禁止商用**：不得用于任何盈利目的。
+- 🔓 **必须开源**：所有二次开发版本必须保持开源并沿用本协议。
+- 详情请参阅 [LICENSE](LICENSE) 文件。
 
 ---
 

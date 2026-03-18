@@ -1,21 +1,26 @@
-MIT License
+# IronForge Open License
 
-Copyright (c) 2026 Xian
+Copyright (c) 2026 Xian (弦)
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## 1. Terms of Use
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+This software is provided "as-is" for personal, educational, and non-profit use only. By using, modifying, or distributing this software, you agree to the following conditions:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+## 2. Non-Commercial Clause (禁止商用)
+
+**Strictly NO Commercial Use.** You may not use this software, its source code, or any derivative works for any commercial purposes, including but not limited to:
+- Selling the software or derived versions.
+- Using the software as part of a paid service.
+- Incorporating the software into products for sale.
+
+## 3. Mandatory Open Source (必须开源)
+
+**Secondary Development must be Open Source.** If you modify, transform, or build upon this software (Secondary Development), you must distribute your contributions under this same license. You must make the source code of your derivative works publicly available.
+
+## 4. Attribution
+
+You must give appropriate credit to the original author (Xian/弦) and provide a link to the original repository: https://github.com/Rikka06/IronForge
+
+## 5. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

@@ -17,7 +17,7 @@
     <img src="https://img.shields.io/badge/Runtime-Node.js%2018%2B-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">
     <img src="https://img.shields.io/badge/Sensor-3--Axis%20Accel-green?style=for-the-badge&logo=generic-electric&logoColor=white" alt="Accelerometer">
     <br>
-    <a href="https://github.com/Rikka06/IronForge/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Rikka06/IronForge?style=flat-square" alt="License"></a>
+    <a href="https://github.com/Rikka06/IronForge/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-Strict%20NC--SA-red?style=flat-square" alt="License"></a>
     <img src="https://img.shields.io/github/languages/top/Rikka06/IronForge?style=flat-square" alt="Top Language">
     <img src="https://img.shields.io/badge/Dev-Xian-orange?style=flat-square" alt="Author">
   </p>
@@ -131,7 +131,10 @@ Connect with us:
 
 ## 📜 License
 
-Distributed under the **MIT** License. See [LICENSE](LICENSE) for more information.
+Distributed under the **IronForge Open License**:
+- 🚫 **No Commercial Use**: strictly prohibited.
+- 🔓 **Mandatory Open Source**: all derivatives must remain open-source under the same terms.
+- See [LICENSE](LICENSE) for more information.
 
 ---
 
