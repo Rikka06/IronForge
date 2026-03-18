@@ -1,10 +1,10 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Rikka06/IronForge/main/src/assets/logo.png" alt="IronForge Logo" width="120" onerror="this.src='https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/hammer.svg';this.width=100">
+  <img src="https://raw.githubusercontent.com/Rikka06/IronForge/main/src/common/logo.png" alt="IronForge Logo" width="120" onerror="this.src='https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/svgs/solid/hammer.svg';this.width=100">
 
-  # IronForge | 淬火工坊 🛠️
+  # IronForge | 淬火工坊 ⚒️
 
-  **小米 Vela AIoT 操作系统专用的高效开发锻造工具链**  
-  *The high-performance development and forging toolchain for Xiaomi Vela AIoT OS.*
+  **专为 Xiaomi Vela 智能手表打造的“数字锻造”趣味运动模拟器**  
+  *A fun "Digital Forging" motion simulator designed for Xiaomi Vela smartwatches.*
 
   [English](./README_EN.md) | **简体中文**
 
@@ -13,13 +13,13 @@
     <a href="https://github.com/Rikka06/IronForge/network/members"><img src="https://img.shields.io/github/forks/Rikka06/IronForge?style=for-the-badge&logo=github&color=blue" alt="Forks"></a>
     <a href="https://iot.mi.com/vela"><img src="https://img.shields.io/badge/Platform-Xiaomi%20Vela-ff6b00?style=for-the-badge&logo=xiaomi" alt="Vela OS"></a>
     <br>
-    <img src="https://img.shields.io/badge/Language-JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript">
+    <img src="https://img.shields.io/badge/Language-JavaScript%20/%20UX-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JS/UX">
     <img src="https://img.shields.io/badge/Runtime-Node.js%2018%2B-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js">
-    <img src="https://img.shields.io/badge/Toolkit-AIoT%20IDE-0052FF?style=for-the-badge&logo=visual-studio-code&logoColor=white" alt="AIoT IDE">
+    <img src="https://img.shields.io/badge/Sensor-3--Axis%20Accel-green?style=for-the-badge&logo=generic-electric&logoColor=white" alt="Accelerometer">
     <br>
     <a href="https://github.com/Rikka06/IronForge/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Rikka06/IronForge?style=flat-square" alt="License"></a>
     <img src="https://img.shields.io/github/languages/top/Rikka06/IronForge?style=flat-square" alt="Top Language">
-    <img src="https://img.shields.io/badge/Made%20for-Xiaomi%20Wearable-orange?style=flat-square" alt="Made for Wearables">
+    <img src="https://img.shields.io/badge/Dev-弦%20(Xian)-orange?style=flat-square" alt="Author">
   </p>
 </div>
 
@@ -27,67 +27,74 @@
 
 ## 📖 项目概述 (Overview)
 
-**IronForge (淬火工坊)** 是由 **弦 (Xian)** 组织精心打造的专业工程化套件。我们深知穿戴设备开发中包体积限制、环境差异大、调试链路长等痛点。IronForge 通过深度集成小米官方 **AIoT IDE**，为开发者提供从初始化到云端 OTA 的全生命周期加速，助力每一款 Vela 应用都能练就“百炼成钢”的极致品质。
+**IronForge (淬火工坊)** 是一款专为 **Xiaomi Vela 智能手表** 开发的沉浸式运动辅助应用。它不是简单的计数器，而是一款利用手表内置**三轴加速度传感器**，精准捕捉手腕往复运动的“数字锻造”模拟器。
+
+无论是在锻炼肱二头肌，还是在工作间隙进行趣味活动，IronForge 都能实时记录你的每一次“击打”，并提供多维度的工艺评级与成就解锁。
 
 ---
 
-## ✨ 核心特性 (Features)
+## ✨ 核心功能 (Features)
 
-### 🚀 极简一键初始化
-秒级生成基于最佳实践的 Vela 工程模板，内置代码规范与项目结构，告别手动配置的繁琐。
+### 🚀 极简交互设计
+采用复古工业风 UI，专为 OLED 屏幕优化。首页“一键开始”，模拟真实的打铁快感。
 
-### 🏗️ 官方 AIoT IDE 深度集成
-开发者无需关心复杂的底层编译指令。在 **小米 AIoT IDE** 中一键点击，即可完成 RPK 日志抓取、断点调试与固件构建。
+### 🧠 核心算法：HammerDetector
+> [!IMPORTANT]
+> **拒绝误计。**  
+采用自适应“均值穿越检测”算法，精准识别有效的冲程运动，自动过滤走动或微小抖动产生的噪声。
 
-### 📊 像素级体积分析
-> [!TIP]
-> **穿戴设备每一 KB 空间都弥足珍贵。**  
-IronForge 提供颗粒度到文件的体积可视化工具，直观定位冗余依赖，支持针对 Vela 运行时的资源深度压缩。
+### 📊 多维评级系统 (SSS ~ D)
+锻造结束后，系统会从四个维度对你的“手艺”进行评估：
+- **炉火纯度** (时长)
+- **锻打极速** (峰值 SPM)
+- **锤炼精度** (节奏稳定性)
+- **产出总量** (总次数)
 
-### 💻 增强型本地仿真
-模拟真实手表的触摸交互、传感器数值输入（加速度、心率等）与异常逻辑断点，在真机上手前解决 99% 的交互漏洞。
+### 🏆 15 项隐藏成就
+从“初入铁匠铺”到传说级的“千锤百炼”，覆盖 5 种稀有度。有些成就是即时解锁的，有些则需要你“静心冥想”（在报告页停留）才能发现。
 
-### 📦 工业级打包流水线
-全自动化的 **签名 → 打包 → 校验 → 固件生成** 流程。内置 OTA 差异包对比算法，确保更小、更快的云端分发。
+### 📈 详尽数据统计
+内置周报与月报视图，通过直观的柱状图分析你的锻造分布。更有针对月度表现的趣味评语。
 
 ---
 
-## 🛠️ 工作流演示 (Workflow)
+## 🛠️ 应用工作流 (App Workflow)
 
 ```mermaid
-graph LR
-    A[一键 Init] --> B[源码开发]
-    B --> C[AIoT IDE 编译]
-    C --> D{仿真调试}
-    D -- 修复 --> B
-    D -- 通过 --> E[体积分析/优化]
-    E --> F[签名打包 RPK]
-    F --> G[OTA 云端发布]
-    style C fill:#ff6b00,stroke:#333,stroke-width:2px,color:#fff
+graph TD
+    A[首页 index] --> B[锻造中 forge]
+    B -- 实时传感器捕捉 --> C{HammerDetector}
+    C -- 识别冲程 --> D[计数/SPM/震动反馈]
+    D -- 暂停/继续 --> B
+    B -- 结束 --> E[锻造报告 report]
+    E -- 综合评分 --> F{成就检测}
+    F -- 解锁 --> G[成就殿堂 achievements]
+    E -- 存储 --> H[历史记录 history]
+    H --> I[数据统计 stats]
 ```
 
 ---
 
-## ⚡ 快速上手 (Quick Start)
+## ⚡ 快速开始 (Development)
 
 ### 使用小米官方 AIoT IDE (推荐)
 
-1. **克隆项目**:
+1. **项目克隆**:
    ```bash
    git clone https://github.com/Rikka06/IronForge.git
    ```
-2. **导入 IDE**: 启动 **Xiaomi AIoT IDE**，选择 `打开项目` 并指向 `IronForge` 根目录。
-3. **一键构建**: 点击 IDE 顶部工具栏中的 **编译 (Build)** 按钮。
-4. **运行调试**: 开启 **本地仿真器 (Simulator)**，点击 **运行 (Run)** 即可即时看到效果。
+2. **导入 IDE**: 启动 **Xiaomi AIoT IDE**，点击 `打开项目` 并选择 `IronForge` 根目录。
+3. **编译烧录**:
+   - 点击顶部 **编译 (Build)** 按钮生成 RPK 包。
+   - 连接手表或启动模拟器，点击 **运行 (Run)** 即可部署。
 
-### 开发者工具安装 (CLI)
+### 手动安装依赖
 
 ```bash
-# 全局安装 IronForge 工具链包
+# 安装开发工具链
 npm install -g @xian/ironforge-toolkit
-
-# 初始化新项目
-ironforge init my-vela-app
+# 安装项目依赖
+npm install
 ```
 
 ---
@@ -95,43 +102,40 @@ ironforge init my-vela-app
 ## 📂 目录结构 (Directory Structure)
 
 <details>
-<summary>点击展开查看完整树状结构</summary>
+<summary>点击展开查看应用源代码结构</summary>
 
 ```text
 IronForge/
-├── src/                # 源码核心：UX 布局、逻辑与样式
-│   ├── pages/          # 页面模块
-│   └── common/         # 公共组件与工具类
-├── build/              # 针对 Vela 定制的构建脚本
-├── dist/               # 产物目录：包含最终生成的 .rpk 包
-├── sign/               # 签名秘钥与安全中心
-├── node_modules/       # 依赖管理 (Node.js)
-├── .prettierrc.js      # 2026 最新代码美美化规范
-├── package.json        # 核心依赖说明
-└── README.md           # 你正在看的这篇顶级文档
+├── src/
+│   ├── manifest.json           # 应用清单：权限与路由配置
+│   ├── pages/                  # 核心页面 (index, forge, report, stats...)
+│   └── common/
+│       ├── utils.js            # 核心算法：HammerDetector & 评级逻辑
+│       └── logo.png            # 应用图标
+├── dist/                       # 编译产物 (.rpk)
+├── sign/                       # 发布签名
+├── package.json                # 项目依赖
+└── README_OLD.md               # 原始开发文档备份
 ```
 </details>
 
 ---
 
-## 🖼️ 预览建议 (Screenshots)
+## 🖼️ 视觉展示 (Visuals)
 
-*为了展示 IronForge 的强大能力，建议补充以下截图：*
-1. **[Hero_UI]**：AIoT IDE 中 IronForge 项目成功编译的界面。
-2. **[Size_Analysis]**：直观的包体积分析饼图/树状图。
-3. **[Simulator]**：在圆形表盘模拟器上运行的 IronForge 示例。
-4. **[OTA_Status]**：流水线成功生成 OTA 签名的控制台输出。
+*建议开发者上传实际运行截图：*
+1. **[Forge_Screen]**：锻造中巨大的数字计数与 SPM 表盘。
+2. **[Rating_SSS]**：获得金黄色 SSS 评价的震撼效果。
+3. **[Achievement_Wall]**：成就殿堂中错落有致的奖牌墙。
 
 ---
 
-## 🤝 如何贡献 (Contributing)
+## 🤝 贡献与社区 (Community)
 
-我们渴望听到来自社区的声音：
-1. **Fork** 本项目到你的仓库。
-2. 创建新的特性分支 (`git checkout -b feat/YourFeature`)。
-3. 提交你的代码 (`git commit -m 'feat: add amazing feature'`)。
-4. 推送至 GitHub (`git push origin feat/YourFeature`)。
-5. 发起 **Pull Request**。
+我们欢迎任何形式的反馈：
+- **作者**：弦 (Xian)
+- **B站**：北极弦 / **抖音**：LOVE54760
+- **社区**：欢迎加入 [Vela 开发者社区](https://iot.mi.com/vela)
 
 ---
 
@@ -142,6 +146,5 @@ IronForge/
 ---
 
 <div align="center">
-  <h3>✨ 如果这个工具对您有帮助，点个 Star 鼓励一下吧！ ✨</h3>
-  <p>加入 <a href="https://iot.mi.com/vela">Vela 开发者社区</a> | 关注组织 <a href="https://github.com/Rikka06">弦 (Xian)</a></p>
+  <h3>✨ 如果你喜欢这款打铁模拟器，请给个 Star 喵！ ✨</h3>
 </div>
