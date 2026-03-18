@@ -1,85 +1,6 @@
 # IronForge 🛠️
 
-[English](#english) | [简体中文](#中文)
-
-<div id="english"></div>
-
-# IronForge (English)
-
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
-[![Stars](https://img.shields.io/github/stars/Rikka06/IronForge.svg?style=social)](https://github.com/Rikka06/IronForge/stargazers)
-[![Vela OS](https://img.shields.io/badge/OS-Xiaomi%20Vela-orange.svg)](https://iot.mi.com/vela)
-
-## Overview
-
-**IronForge** is a high-efficiency development and forging toolchain exclusively designed for the **Xiaomi Vela AIoT Operating System**. It bridges the gap between raw code and wearable-optimized applications, providing developers with a professional suite of tools to build, optimize, and deploy high-performance applications for smartwatches and IoT devices.
-
-## Features
-
-- 🚀 **Minimalist One-Click Initialization**: Bootstrap your project with production-ready templates in seconds.
-- 🏗️ **Intelligent Build & Optimization**: Advanced compiler integration tailored for Vela OS's resource constraints.
-- 📊 **Dependency & Size Analysis**: Granular insights into bundle size and dependency weight to keep your apps lean.
-- 💻 **Enhanced Local Simulation**: High-fidelity smartwatch environment for rapid UI testing and logic debugging.
-- 📦 **Firmware & OTA Packaging Pipeline**: Automated signing and packing workflow ready for over-the-air updates.
-
-## Quick Start
-
-```bash
-# Clone the repository
-git clone https://github.com/Rikka06/IronForge.git && cd IronForge
-
-# Initialize the professional workspace
-ironforge init --template smartwatch-default
-
-# Compile and optimize for Vela OS
-ironforge build --release
-
-# Flash to the connected device / simulation
-ironforge flash --target emulator
-```
-
-## Installation
-
-```bash
-# Install via npm
-npm install -g @xian/ironforge-toolkit
-
-# OR build from source
-git clone https://github.com/Rikka06/IronForge.git
-cd IronForge
-npm install && npm link
-```
-
-## Directory Structure
-
-```text
-IronForge/
-├── src/                # Application source code (UX/JS/CSS)
-├── build/              # Build scripts and intermediate artifacts
-├── dist/               # Compiled RPK and production assets
-├── sign/               # Certificates and signing tools
-├── .prettierrc.js      # Formatting standards
-├── package.json        # Dependencies and scripts
-└── README.md           # Project documentation
-```
-
-## Contributing
-
-We welcome contributions from the Vela developer community! 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-<div id="中文"></div>
+[English](./README_EN.md)
 
 # IronForge (简体中文)
 
@@ -94,37 +15,33 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## 核心功能
 
 - 🚀 **极简一键初始化项目**: 秒级生成生产级开发模板，告别繁琐的手动配置。
-- 🏗️ **针对 Vela 的智能构建与优化**: 深度适配 Vela 系统特性的编译器优化，榨干每一份硬件性能。
+- 🏗️ **小米官方 AIoT IDE 支持**: 深度集成 **小米 AIoT IDE**，支持一键编译、调试与发布。
 - 📊 **依赖与体积分析工具**: 像素级的包体积可视化分析，确保应用在轻量级设备上依然轻盈如燕。
-- 💻 **增强型本地仿真调试**: 模拟真实手表的运行环境，支持高频点击、传感器模拟与逻辑断点调试。
+- 💻 **增强型本地仿真调试**: 模拟真实手表的运行环境，支持传感器模拟与逻辑断点调试。
 - 📦 **固件 & OTA 打包流水线**: 全自动化的签名、打包与校验流程，无缝对接云端 OTA 发布系统。
 
-## 快速上手
+## 快速上手 (使用 AIoT IDE)
+
+1. **克隆项目**:
+   ```bash
+   git clone https://github.com/Rikka06/IronForge.git
+   ```
+2. **使用 IDE 打开**:
+   - 启动 **小米 AIoT IDE**。
+   - 点击 `打开项目`，选择 `IronForge` 文件夹。
+3. **编译与烧录**:
+   - 点击界面上的 `编译` 按钮开始构建。
+   - 使用 `运行` 或 `烧录` 功能部署到真实手表或模拟器。
+
+## 手动安装调试
 
 ```bash
-# 克隆仓库
-git clone https://github.com/Rikka06/IronForge.git && cd IronForge
-
-# 初始化专业工作空间
-ironforge init --template smartwatch-default
-
-# 为 Vela OS 编译并优化
-ironforge build --release
-
-# 烧录至连接的设备或模拟器
-ironforge flash --target emulator
-```
-
-## 安装调试
-
-```bash
-# 通过 npm 全局安装
+# 通过 npm 全局安装工具链 (可选)
 npm install -g @xian/ironforge-toolkit
 
-# 或者从源码安装
-git clone https://github.com/Rikka06/IronForge.git
+# 安装项目依赖
 cd IronForge
-npm install && npm link
+npm install
 ```
 
 ## 目录结构
